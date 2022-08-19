@@ -14,13 +14,7 @@ export class UserCommand extends Command {
 	public async messageRun(message: Message) {
 		await send(message, 'Gathering your session data...');
 
-		const userSessions = await prisma.userSession.findMany({
-			where: {
-				endedAt: {
-					not: null
-				}
-			}
-		});
+		const userSessions = await prisma.userSession.findMany();
 
 		if (userSessions.length <= 0) {
 			return send(message, `There are no sessions.`);
@@ -34,7 +28,7 @@ export class UserCommand extends Command {
 				return user?.nickname ?? user?.user.username ?? 'Unknown';
 			}),
 			R.mapValues((sessions) => {
-				const durations = sessions.map((y) => intervalToDuration({ start: y.startedAt, end: y.endedAt! }));
+				const durations = sessions.map((y) => intervalToDuration({ start: y.startedAt, end: y.endedAt ?? new Date() }));
 				return normalize(sum(...durations));
 			})
 		);
