@@ -1,7 +1,7 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { Events, Listener, ListenerOptions } from '@sapphire/framework';
 import type { Activity, VoiceState } from 'discord.js';
-import prisma from '../lib/database';
+import prisma from '../database';
 
 const emojiDictionary = new Map([
 	['lounge', '🍹'],
@@ -105,9 +105,8 @@ export class SessionLifecycle extends Listener {
 			}
 
 			const template = voiceSession.SessionCreationChannel?.template || '%emoji% %name%';
-			let newChannelName = template
-				.replaceAll('%emoji%', emojiDictionary.get((voiceSession.SessionCreationChannel?.fallbackName ?? 'Lounge').toLowerCase()) || '🎮')
-				.replaceAll('%name%', voiceSession.SessionCreationChannel?.fallbackName ?? 'Lounge');
+
+			let newChannelName: string;
 
 			if (voiceSession.SessionCreationChannel?.usePresence) {
 				const activities = state.channel.members
@@ -115,10 +114,10 @@ export class SessionLifecycle extends Listener {
 					.flat()
 					.filter((x): x is Activity => !!x);
 
-				const activityName = GenerateNameFromActivities(activities, voiceSession.SessionCreationChannel?.fallbackName);
-				newChannelName = template
-					.replaceAll('%emoji%', emojiDictionary.get(activityName.toLowerCase()) || '🎮')
-					.replaceAll('%name%', activityName);
+				const activityName = generateNameFromActivities(activities, voiceSession.SessionCreationChannel?.fallbackName);
+				newChannelName = applyTemplate(template, activityName);
+			} else {
+				newChannelName = applyTemplate(template, voiceSession.SessionCreationChannel?.fallbackName ?? 'Lounge');
 			}
 
 			await state.channel.setName(newChannelName);
@@ -126,7 +125,13 @@ export class SessionLifecycle extends Listener {
 	}
 }
 
-const GenerateNameFromActivities = (activities: Activity[], fallback: string | undefined): string => {
+const applyTemplate = (template: string, name: string) => {
+	return template
+		.replaceAll('%emoji%', emojiDictionary.get(name.toLowerCase()) || '🎮')
+		.replaceAll('%name%', name);
+}
+
+const generateNameFromActivities = (activities: Activity[], fallback: string | undefined): string => {
 	const games = activities
 		.filter((x) => x?.type === 'PLAYING')
 		.map((x) => x?.name)
@@ -150,5 +155,5 @@ const GenerateNameFromActivities = (activities: Activity[], fallback: string | u
 		return "Vibin'";
 	}
 
-	return fallback ? fallback : 'Lounge';
+	return fallback ?? 'Lounge';
 };
