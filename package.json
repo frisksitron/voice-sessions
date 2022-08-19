@@ -16,7 +16,9 @@
     "date-fns": "^2.29.2",
     "discord.js": "^13.8.0",
     "dotenv-cra": "^3.0.2",
-    "reflect-metadata": "^0.1.13"
+    "duration-fns": "^3.0.1",
+    "reflect-metadata": "^0.1.13",
+    "remeda": "^1.0.1"
   },
   "devDependencies": {
     "@sapphire/prettier-config": "^1.2.9",

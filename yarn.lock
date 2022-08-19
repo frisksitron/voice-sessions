@@ -384,6 +384,11 @@ duplexer@~0.1.1:
   resolved "https://registry.yarnpkg.com/duplexer/-/duplexer-0.1.2.tgz#3abe43aef3835f8ae077d136ddce0f276b0400e6"
   integrity sha512-jtD6YG370ZCIi/9GTaJKQxWTZD045+4R4hTk/x1UyoqadyJ9x9CgSi1RlVDQF8U2sxLLSnFkCaMihqljHIWgMg==
 
+duration-fns@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/duration-fns/-/duration-fns-3.0.1.tgz#72fc3400ee8c511ee36a19edf26bf49104d4c051"
+  integrity sha512-GHxED15UbbjNyCwk8OBGDs5KV+Zn/cloq66c4IPUslC3JfbbXncW9gtxfpG9b0xDVpVkPFzqy6lZaq9iyqff3Q==
+
 error-ex@^1.3.1:
   version "1.3.2"
   resolved "https://registry.yarnpkg.com/error-ex/-/error-ex-1.3.2.tgz#b4ac40648107fdcdcfae242f428bea8a14d4f1bf"
@@ -863,6 +868,11 @@ regexp.prototype.flags@^1.4.3:
     call-bind "^1.0.2"
     define-properties "^1.1.3"
     functions-have-names "^1.2.2"
+
+remeda@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/remeda/-/remeda-1.0.1.tgz#020ad631248d7670cfeff36db2309b80c7d38287"
+  integrity sha512-W/YDzHzIDDFnD9g5fKmvKSnV7uFvDV6EnM+dfd2iCQdhTyttvhcBkK3YTaxIikefr9UkAsxHyxdZWjhbWZ7x8g==
 
 resolve@^1.10.0:
   version "1.22.1"
