@@ -10,20 +10,37 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Guild {
+  id                     String                   @id @unique
+  createdAt              DateTime                 @default(now())
+  SessionCreationChannel SessionCreationChannel[]
+}
+
 model SessionCreationChannel {
   id           String                @id @unique
   template     String                @default("%emoji% %name%")
   fallbackName String                @default("Lounge")
   usePresence  Boolean               @default(true)
   createdAt    DateTime              @default(now())
-  sessions     VoiceSessionChannel[]
+  Sessions     VoiceSessionChannel[]
+  Guild        Guild                 @relation(fields: [guildId], references: [id])
+  guildId      String
 }
 
 model VoiceSessionChannel {
-  id                       String                  @id @unique
-  createdAt                DateTime                @default(now())
+  id                       String                 @id @unique
+  createdAt                DateTime               @default(now())
   deletedAt                DateTime?
-  deleted                  Boolean                 @default(false)
-  SessionCreationChannel   SessionCreationChannel? @relation(fields: [sessionCreationChannelId], references: [id])
-  sessionCreationChannelId String?
+  SessionCreationChannel   SessionCreationChannel @relation(fields: [sessionCreationChannelId], references: [id])
+  sessionCreationChannelId String
+  UserSessions             UserSession[]
+}
+
+model UserSession {
+  id                    String              @id @default(uuid())
+  userId                String
+  startedAt             DateTime            @default(now())
+  endedAt               DateTime?
+  VoiceSessionChannel   VoiceSessionChannel @relation(fields: [voiceSessionChannelId], references: [id])
+  voiceSessionChannelId String
 }

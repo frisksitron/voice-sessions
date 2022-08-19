@@ -22,7 +22,7 @@ const emojiDictionary = new Map([
 @ApplyOptions<ListenerOptions>({
 	event: Events.VoiceStateUpdate
 })
-export class SessionLifecycle extends Listener {
+export class VoiceSessionLifecycle extends Listener {
 	public async run(oldState: VoiceState, newState: VoiceState) {
 		// Remove empty voice channel
 		if (oldState.channel && oldState.channel.members.size <= 0) {
@@ -42,7 +42,6 @@ export class SessionLifecycle extends Listener {
 						id: oldChannelId
 					},
 					data: {
-						deleted: true,
 						deletedAt: new Date()
 					}
 				});
@@ -86,7 +85,9 @@ export class SessionLifecycle extends Listener {
 		// Rename channel
 		const voiceSessions = await prisma.voiceSessionChannel.findMany({
 			where: {
-				deleted: false
+				deletedAt: {
+					equals: null
+				}
 			},
 			include: {
 				SessionCreationChannel: true
@@ -126,10 +127,8 @@ export class SessionLifecycle extends Listener {
 }
 
 const applyTemplate = (template: string, name: string) => {
-	return template
-		.replaceAll('%emoji%', emojiDictionary.get(name.toLowerCase()) || '🎮')
-		.replaceAll('%name%', name);
-}
+	return template.replaceAll('%emoji%', emojiDictionary.get(name.toLowerCase()) || '🎮').replaceAll('%name%', name);
+};
 
 const generateNameFromActivities = (activities: Activity[], fallback: string | undefined): string => {
 	const games = activities
