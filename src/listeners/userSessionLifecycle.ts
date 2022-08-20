@@ -8,7 +8,7 @@ import prisma from '../database';
 const rolesDictionary = new Map([
 	[{ minutes: 5 }, '1010462867360841778'],
 	[{ minutes: 60 }, '1010463170009251850'],
-	[{ minutes: 420 }, '1010463581210419220']
+	[{ minutes: 420 }, '1010463170009251850']
 ]);
 
 @ApplyOptions<ListenerOptions>({
@@ -68,19 +68,19 @@ export class UserSessionLifecycle extends Listener {
 				.filter(([duration]) => totalMinutes >= toMinutes(duration))
 				.sort(([keyA], [keyB]) => toMinutes(keyB) - toMinutes(keyA))[0];
 
-			const member = newState.guild.members.cache.get(userId);
+			const member = await newState.guild.members.fetch(userId);
 
 			if (member) {
 				if (role) {
-					const roleObject = newState.guild.roles.cache.get(role[1]);
+					const roleObject = await newState.guild.roles.fetch(role[1]);
 
 					if (roleObject) {
 						const rolesToRemove = member.roles.cache.filter((role) => role.id !== roleObject.id);
-						member.roles.remove(rolesToRemove);
-						member.roles.member.roles.set([roleObject]);
+						await member.roles.remove(rolesToRemove);
+						await member.roles.member.roles.set([roleObject]);
 					}
 				} else {
-					member.roles.remove([...rolesDictionary.values()]);
+					await member.roles.remove([...rolesDictionary.values()]);
 				}
 			}
 		}
