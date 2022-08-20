@@ -4,6 +4,7 @@ import { send } from '@sapphire/plugin-editable-commands';
 import type { Message } from 'discord.js';
 import prisma from '../database';
 import { formatDistanceStrict, formatDistanceToNowStrict } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 
 @ApplyOptions<CommandOptions>({
 	description: 'view your sessions'
@@ -31,6 +32,10 @@ export class UserCommand extends Command {
 					not: null
 				}
 			},
+			orderBy: {
+				endedAt: 'desc'
+			},
+			take: 5,
 			include: {
 				VoiceSessionChannel: true
 			}
@@ -44,13 +49,21 @@ export class UserCommand extends Command {
 
 		if (activeUserSession) {
 			content += `**Active Session**\n`;
-			content += `Duration: ${formatDistanceToNowStrict(activeUserSession.startedAt)}\n`;
+			content += `For ${formatDistanceToNowStrict(activeUserSession.startedAt)} since ${formatInTimeZone(
+				activeUserSession.startedAt,
+				'Europe/Oslo',
+				'd. MMMM HH:mm:ss'
+			)} \n`;
 		}
 
 		if (userSessions.length > 0) {
-			content += `**Past Sessions**\n`;
-			userSessions.forEach((session, index) => {
-				content += `Session ${index}: ${formatDistanceStrict(session.startedAt, session.endedAt!)}\n`;
+			content += `**Last 10 Sessions**\n`;
+			userSessions.forEach((session) => {
+				const duration = formatDistanceStrict(session.startedAt, session.endedAt!);
+				const startedAtDateTz = formatInTimeZone(session.startedAt, 'Europe/Oslo', 'd. MMMM yyyy');
+				const startedAtTimeTz = formatInTimeZone(session.startedAt, 'Europe/Oslo', 'HH:mm:ss');
+				const endedAtTz = formatInTimeZone(session.endedAt!, 'Europe/Oslo', 'HH:mm:ss');
+				content += `${startedAtDateTz} **${startedAtTimeTz} - ${endedAtTz}** (${duration})\n`;
 			});
 		}
 
