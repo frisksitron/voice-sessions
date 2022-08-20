@@ -32,7 +32,7 @@ const client = new SapphireClient({
 		]
 	},
 	shards: 'auto',
-	intents: ['GUILDS', 'GUILD_VOICE_STATES', 'GUILD_MESSAGES', 'GUILD_PRESENCES']
+	intents: ['GUILDS', 'GUILD_VOICE_STATES', 'GUILD_MESSAGES', 'GUILD_PRESENCES', 'GUILD_MEMBERS']
 });
 
 const main = async () => {
