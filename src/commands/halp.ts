@@ -3,7 +3,7 @@ import { Command, CommandOptions } from '@sapphire/framework';
 import { send } from '@sapphire/plugin-editable-commands';
 import type { Message } from 'discord.js';
 import prisma from '../database';
-import { addDays, addHours, differenceInSeconds, formatDistanceStrict, startOfDay } from 'date-fns';
+import { addHours, differenceInSeconds, formatDistanceStrict, startOfDay, subDays } from 'date-fns';
 import { formatInTimeZone } from 'date-fns-tz';
 
 @ApplyOptions<CommandOptions>({
@@ -16,18 +16,8 @@ export class UserCommand extends Command {
 		const user = message.author;
 
 		if (user.id !== '152782597083103232') {
-			return send(message, `Wait... who are you!?.`);
+			return send(message, `Wait... who are you!?`);
 		}
-
-		const activeUserSession = await prisma.userSession.findFirst({
-			where: {
-				userId: user.id,
-				endedAt: null
-			},
-			include: {
-				VoiceSessionChannel: true
-			}
-		});
 
 		const userSessions = await prisma.userSession.findMany({
 			where: {
@@ -44,13 +34,13 @@ export class UserCommand extends Command {
 			}
 		});
 
-		if (!activeUserSession && !userSessions.length) {
+		if (userSessions.length <= 0) {
 			return send(message, `You have no sessions.`);
 		}
 
 		const sessionsLast3Days = userSessions.filter((session) => {
 			const end = new Date(session.endedAt!);
-			const threeDaysAgo = addDays(new Date(), -3);
+			const threeDaysAgo = subDays(new Date(), 3);
 			const six = addHours(startOfDay(end), 6);
 			return end > threeDaysAgo && end < six;
 		});
@@ -68,20 +58,18 @@ export class UserCommand extends Command {
 			return diffB - diffA;
 		});
 
-		console.log(latestSession);
-
-		let content = '';
+		let content: string;
 
 		if (latestSession.length > 0) {
 			const latest = latestSession[0];
 			const duration = formatDistanceStrict(latest.startedAt, latest.endedAt!);
-			content += `Your most Steiniest night ended **${formatInTimeZone(
+			content = `Your most Steiniest night ended **${formatInTimeZone(
 				latest.endedAt!,
 				'Europe/Oslo',
 				'd. MMMM yyyy HH:mm'
 			)}** and lasted ${duration}\n`;
 		} else {
-			content += `Du har **ikke** steinet de siste 3 dagene!!!\n`;
+			content = `Du har **ikke** steinet de siste 3 dagene!!!\n`;
 		}
 
 		return send(message, content);
