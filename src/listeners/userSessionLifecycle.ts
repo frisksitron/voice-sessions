@@ -8,7 +8,7 @@ import prisma from '../database';
 const rolesDictionary = new Map([
 	[{ minutes: 5 }, '1010462867360841778'],
 	[{ minutes: 60 }, '1010463170009251850'],
-	[{ minutes: 420 }, '1010463170009251850']
+	[{ minutes: 420 }, '1010461693777821696']
 ]);
 
 @ApplyOptions<ListenerOptions>({
@@ -53,24 +53,28 @@ export class UserSessionLifecycle extends Listener {
 			});
 
 			// Update user role
-			const lastWeek = subDays(new Date(), 7);
-			const lastWeekSessions = userSessions.filter((session) => session.startedAt > lastWeek);
-
-			const totalMinutes = lastWeekSessions.reduce((total, session) => {
-				const duration = intervalToDuration({
-					start: session.startedAt,
-					end: session.endedAt!
-				});
-				return total + toMinutes(duration);
-			}, 0);
-
-			const role = [...rolesDictionary.entries()]
-				.filter(([duration]) => totalMinutes >= toMinutes(duration))
-				.sort(([keyA], [keyB]) => toMinutes(keyB) - toMinutes(keyA))[0];
-
 			const member = await newState.guild.members.fetch(userId);
 
-			if (member) {
+			console.log('member', member);
+
+			if (member.manageable) {
+				console.log('member is manageable');
+
+				const lastWeek = subDays(new Date(), 7);
+				const lastWeekSessions = userSessions.filter((session) => session.startedAt > lastWeek);
+
+				const totalMinutes = lastWeekSessions.reduce((total, session) => {
+					const duration = intervalToDuration({
+						start: session.startedAt,
+						end: session.endedAt!
+					});
+					return total + toMinutes(duration);
+				}, 0);
+
+				const role = [...rolesDictionary.entries()]
+					.filter(([duration]) => totalMinutes >= toMinutes(duration))
+					.sort(([keyA], [keyB]) => toMinutes(keyB) - toMinutes(keyA))[0];
+
 				if (role) {
 					const roleObject = await newState.guild.roles.fetch(role[1]);
 
