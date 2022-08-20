@@ -16,7 +16,7 @@ export class UserCommand extends Command {
 		const user = message.author;
 
 		if (user.id !== '152782597083103232') {
-			return send(message, `You are not allowed to use this command.`);
+			return send(message, `Wait... who are you!?.`);
 		}
 
 		const activeUserSession = await prisma.userSession.findFirst({
@@ -76,7 +76,7 @@ export class UserCommand extends Command {
 			const latest = latestSession[0];
 			const duration = formatDistanceStrict(latest.startedAt, latest.endedAt!);
 			content += `Your most Steiniest night ended **${formatInTimeZone(
-				latest.startedAt!,
+				latest.endedAt!,
 				'Europe/Oslo',
 				'd. MMMM yyyy HH:mm'
 			)}** and lasted ${duration}\n`;
