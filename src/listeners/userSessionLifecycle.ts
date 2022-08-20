@@ -43,6 +43,26 @@ export class UserSessionLifecycle extends Listener {
 			});
 
 			if (voiceSession) {
+				// End existing sessions
+				const userSession = await prisma.userSession.findMany({
+					where: {
+						userId: userId,
+						endedAt: null
+					}
+				});
+				if (userSession.length > 0) {
+					await prisma.userSession.updateMany({
+						where: {
+							userId: userId,
+							endedAt: null
+						},
+						data: {
+							endedAt: new Date()
+						}
+					});
+				}
+
+				// Create new session
 				await prisma.userSession.create({
 					data: {
 						userId: userId,
