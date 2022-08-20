@@ -41,7 +41,6 @@
     "watch:start": "tsc-watch --onSuccess \"node ./dist/index.js\"",
     "format": "prettier --write \"src/**/*.ts\""
   },
-  "prettier": "@sapphire/prettier-config",
   "engines": {
     "node": ">=16.15.0"
   }
