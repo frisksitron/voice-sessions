@@ -95,9 +95,9 @@ export class LatestCommand extends Command {
         'd. MMMM yyyy HH:mm'
       );
       const duration = formatDistanceStrict(latest.startedAt, latest.endedAt!);
-      content = `Your most Steiniest night ended **${end}** and lasted ${duration}\n`;
+      content = `The most Steiniest night for ${user} ended **${end}** and lasted ${duration}`;
     } else {
-      content = `No Steiny nights lately... \n`;
+      content = `${user} had no Steiny nights lately...`;
     }
 
     await interaction.reply({

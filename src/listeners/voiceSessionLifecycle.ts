@@ -1,5 +1,4 @@
-import { ApplyOptions } from '@sapphire/decorators';
-import { Events, Listener, ListenerOptions } from '@sapphire/framework';
+import { Events, Listener } from '@sapphire/framework';
 import type { Activity, VoiceState } from 'discord.js';
 import prisma from '../database';
 
@@ -14,15 +13,20 @@ const emojiDictionary = new Map([
   ['pummel party', '🎉'],
   ['f1 2021', '🏎'],
   ['f1 2022', '🏎'],
+  ['f1 22', '🏎'],
   ['factorio', '⚙️'],
   ['league of legends', '️⚔️'],
   ["tiny tina's wonderlands", '🌈'],
 ]);
 
-@ApplyOptions<ListenerOptions>({
-  event: Events.VoiceStateUpdate,
-})
 export class VoiceSessionLifecycle extends Listener {
+  public constructor(context: Listener.Context, options: Listener.Options) {
+    super(context, {
+      ...options,
+      event: Events.VoiceStateUpdate,
+    });
+  }
+
   public async run(oldState: VoiceState, newState: VoiceState) {
     // Remove empty voice channel
     if (oldState.channel && oldState.channel.members.size <= 0) {
@@ -61,11 +65,10 @@ export class VoiceSessionLifecycle extends Listener {
         const channel = await newState.guild.channels.fetch(
           sessionCreationChannel.id
         );
-        const position = channel?.position
-          ? channel.position === 0
-            ? 1
-            : channel?.position
-          : 0;
+
+        const position = !channel?.parent
+          ? channel?.position
+          : channel.position + 2 ?? 0;
 
         const newChannel = await newState.guild.channels.create(
           '⌛ Initializing...',
@@ -73,11 +76,9 @@ export class VoiceSessionLifecycle extends Listener {
             type: 'GUILD_VOICE',
             bitrate: newState.guild.maximumBitrate,
             parent: channel?.parent?.id,
-            position: position + 1,
+            position: position,
           }
         );
-
-        await newChannel.setPosition(position + 1, { relative: false });
 
         // Update database with new channel
         await prisma.voiceSessionChannel.create({

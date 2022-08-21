@@ -1,5 +1,4 @@
-import { ApplyOptions } from '@sapphire/decorators';
-import { Events, ListenerOptions } from '@sapphire/framework';
+import { Events } from '@sapphire/framework';
 import { Listener, Store } from '@sapphire/framework';
 import {
   blue,
@@ -13,12 +12,16 @@ import {
 
 const dev = process.env.NODE_ENV !== 'production';
 
-@ApplyOptions<ListenerOptions>({
-  event: Events.ClientReady,
-  once: true,
-})
 export class UserEvent extends Listener {
   private readonly style = dev ? yellow : blue;
+
+  public constructor(context: Listener.Context, options: Listener.Options) {
+    super(context, {
+      ...options,
+      event: Events.ClientReady,
+      once: true,
+    });
+  }
 
   public run() {
     this.printBanner();

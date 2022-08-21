@@ -46,10 +46,6 @@ export class UserCommand extends Command {
     const leaderboard = R.pipe(
       userSessions,
       R.groupBy((x) => x.userId),
-      R.mapKeys((x) => {
-        const user = guild.members.cache.get(x.toString());
-        return user?.nickname ?? user?.user.username ?? 'Unknown';
-      }),
       R.mapValues((sessions) => {
         const durations = sessions.map((y) =>
           intervalToDuration({
@@ -65,8 +61,10 @@ export class UserCommand extends Command {
     content += `**Leaderboard**\n`;
     Object.entries(leaderboard)
       .sort((a, b) => toMilliseconds(b[1]) - toMilliseconds(a[1]))
-      .forEach(([user, duration], index) => {
-        content += `${index + 1}. ${user} (${formatDuration(duration)})\n`;
+      .forEach(([userId, duration], index) => {
+        const user = guild.members.cache.get(userId) ?? userId;
+        const formattedDuration = formatDuration(duration);
+        content += `${index + 1}. ${user} (${formattedDuration})\n`;
       });
 
     await interaction.reply({

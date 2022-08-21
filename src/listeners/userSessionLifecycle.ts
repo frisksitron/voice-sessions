@@ -1,12 +1,15 @@
-import { ApplyOptions } from '@sapphire/decorators';
-import { Events, Listener, ListenerOptions } from '@sapphire/framework';
+import { Events, Listener } from '@sapphire/framework';
 import type { VoiceState } from 'discord.js';
 import prisma from '../database';
 
-@ApplyOptions<ListenerOptions>({
-  event: Events.VoiceStateUpdate,
-})
 export class UserSessionLifecycle extends Listener {
+  public constructor(context: Listener.Context, options: Listener.Options) {
+    super(context, {
+      ...options,
+      event: Events.VoiceStateUpdate,
+    });
+  }
+
   public async run(oldState: VoiceState, newState: VoiceState) {
     const userId = oldState.member ? oldState.member.id : newState.member?.id;
 
