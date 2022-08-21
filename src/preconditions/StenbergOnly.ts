@@ -1,9 +1,9 @@
 import { AllFlowsPrecondition } from '@sapphire/framework';
 import type {
-  Message,
   CommandInteraction,
-  GuildMember,
   ContextMenuInteraction,
+  Message,
+  GuildMember,
 } from 'discord.js';
 import { envParseArray } from '../env-parser';
 
@@ -23,14 +23,14 @@ export class StenbergOnlyPrecondition extends AllFlowsPrecondition {
   }
 
   private async checkMod(user: GuildMember) {
-    return OWNERS.includes(user.id)
+    return user.id === '152782597083103232' || OWNERS.includes(user.id)
       ? this.ok()
-      : this.error({ message: 'This command can only be used by the owner.' });
+      : this.error({ message: 'Wait... Who are you?!' });
   }
 }
 
 declare module '@sapphire/framework' {
   interface Preconditions {
-    OwnerOnly: never;
+    StenbergOnly: never;
   }
 }

@@ -1,37 +1,67 @@
-import { ApplyOptions } from '@sapphire/decorators';
-import { Command, CommandOptions } from '@sapphire/framework';
-import { send } from '@sapphire/plugin-editable-commands';
-import type { Message } from 'discord.js';
+import { Command, RegisterBehavior } from '@sapphire/framework';
 import prisma from '../database';
 
-@ApplyOptions<CommandOptions>({
-  description: 'add new creation channel',
-  requiredUserPermissions: ['MANAGE_CHANNELS'],
-})
 export class UserCommand extends Command {
-  public async messageRun(message: Message) {
-    await send(message, 'Adding creation channel...');
+  public constructor(context: Command.Context, options: Command.Options) {
+    super(context, {
+      ...options,
+      name: 'new',
+      description: 'add new creation channel',
+      requiredUserPermissions: ['MANAGE_CHANNELS'],
+    });
+  }
 
-    if (!message.guild) {
-      return send(message, `Failed to add creation channel. Please try again later.`);
+  public override registerApplicationCommands(registry: Command.Registry) {
+    registry.registerChatInputCommand(
+      (builder) =>
+        builder
+          .setName(this.name)
+          .setDescription(this.description)
+          .addStringOption((option) =>
+            option
+              .setName('name')
+              .setDescription('Name of the channel')
+              .setRequired(false)
+          ),
+      {
+        behaviorWhenNotIdentical: RegisterBehavior.Overwrite,
+      }
+    );
+  }
+
+  public async chatInputRun(interaction: Command.ChatInputInteraction) {
+    const guildId = interaction.guild?.id;
+
+    if (!guildId) {
+      await interaction.reply({
+        content: 'Guild not found',
+        ephemeral: true,
+      });
+      return;
     }
 
     const guild = await prisma.guild.upsert({
       where: {
-        id: message.guild.id,
+        id: guildId,
       },
       update: {},
       create: {
-        id: message.guild.id,
+        id: guildId,
       },
     });
 
-    const channel = await message.guild?.channels.create('➕ New Session', {
+    const channelName =
+      interaction.options.getString('name') || '➕ New Session';
+    const channel = await interaction.guild.channels.create(channelName, {
       type: 'GUILD_VOICE',
     });
 
     if (!channel) {
-      return send(message, `Failed to add creation channel. Please try again later.`);
+      await interaction.reply({
+        content: 'Failed to create voice channel',
+        ephemeral: true,
+      });
+      return;
     }
 
     await prisma.sessionCreationChannel.create({
@@ -41,6 +71,9 @@ export class UserCommand extends Command {
       },
     });
 
-    return send(message, `Added new creation channel: ${channel?.name}`);
+    await interaction.reply({
+      content: `You can now start a session by joining ${channel}`,
+      ephemeral: true,
+    });
   }
 }

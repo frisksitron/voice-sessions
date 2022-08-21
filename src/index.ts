@@ -26,13 +26,18 @@ const client = new SapphireClient({
   presence: {
     activities: [
       {
-        name: 'to vs/new',
+        name: 'slash commands',
         type: 'LISTENING',
       },
     ],
   },
   shards: 'auto',
-  intents: ['GUILDS', 'GUILD_VOICE_STATES', 'GUILD_MESSAGES', 'GUILD_PRESENCES'],
+  intents: [
+    'GUILDS',
+    'GUILD_VOICE_STATES',
+    'GUILD_MESSAGES',
+    'GUILD_PRESENCES',
+  ],
 });
 
 const main = async () => {

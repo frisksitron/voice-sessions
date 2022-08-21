@@ -1,27 +1,47 @@
-import { ApplyOptions } from '@sapphire/decorators';
-import { Command, CommandOptions } from '@sapphire/framework';
-import { send } from '@sapphire/plugin-editable-commands';
-import type { Message } from 'discord.js';
+import { Command, RegisterBehavior } from '@sapphire/framework';
 import prisma from '../database';
 
-@ApplyOptions<CommandOptions>({
-  description: 'register guild',
-  requiredUserPermissions: ['MANAGE_CHANNELS'],
-})
 export class UserCommand extends Command {
-  public async messageRun(message: Message) {
-    await send(message, 'Registering guild...');
+  public constructor(context: Command.Context, options: Command.Options) {
+    super(context, {
+      ...options,
+      name: 'register',
+      description: 'register guild',
+      requiredUserPermissions: ['MANAGE_CHANNELS'],
+    });
+  }
 
-    if (!message.guild) {
-      return send(message, `Failed to register guild. Please try again later.`);
+  public override registerApplicationCommands(registry: Command.Registry) {
+    registry.registerChatInputCommand(
+      (builder) => builder.setName(this.name).setDescription(this.description),
+      {
+        behaviorWhenNotIdentical: RegisterBehavior.Overwrite,
+      }
+    );
+  }
+
+  public async chatInputRun(interaction: Command.ChatInputInteraction) {
+    if (!interaction.guild) {
+      await interaction.reply({
+        content: 'Guild not found',
+        ephemeral: true,
+      });
+      return;
     }
 
-    await prisma.guild.create({
-      data: {
-        id: message.guild?.id,
+    await prisma.guild.upsert({
+      where: {
+        id: interaction.guild.id,
+      },
+      update: {},
+      create: {
+        id: interaction.guild.id,
       },
     });
 
-    return send(message, `Registered ${message.guild.name} successfully!`);
+    await interaction.reply({
+      content: `Registered ${interaction.guild.name} successfully!`,
+      ephemeral: true,
+    });
   }
 }

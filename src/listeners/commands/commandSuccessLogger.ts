@@ -1,20 +1,27 @@
-import { ApplyOptions } from '@sapphire/decorators';
-import type { CommandSuccessPayload, ListenerOptions } from '@sapphire/framework';
+import type { ChatInputCommandSuccessPayload } from '@sapphire/framework';
 import { Command, Events, Listener, LogLevel } from '@sapphire/framework';
 import type { Logger } from '@sapphire/plugin-logger';
 import { cyan } from 'colorette';
 import type { Guild, User } from 'discord.js';
 
-@ApplyOptions<ListenerOptions>({
-  event: Events.CommandSuccess,
-})
-export class UserEvent extends Listener {
-  public run({ message, command }: CommandSuccessPayload) {
-    const shard = this.shard(message.guild?.shardId ?? 0);
+export class CommandSuccessListener extends Listener {
+  public constructor(context: Listener.Context, options: Listener.Options) {
+    super(context, {
+      ...options,
+      event: Events.ChatInputCommandSuccess,
+    });
+  }
+
+  public run({ command, interaction }: ChatInputCommandSuccessPayload) {
+    const shard = this.shard(interaction.guild?.shardId ?? 0);
     const commandName = this.command(command);
-    const author = this.author(message.author);
-    const sentAt = message.guild ? this.guild(message.guild) : this.direct();
-    this.container.logger.debug(`${shard} - ${commandName} ${author} ${sentAt}`);
+    const author = this.author(interaction.user);
+    const sentAt = interaction.guild
+      ? this.guild(interaction.guild)
+      : this.direct();
+    this.container.logger.debug(
+      `${shard} - ${commandName} ${author} ${sentAt}`
+    );
   }
 
   public onLoad() {

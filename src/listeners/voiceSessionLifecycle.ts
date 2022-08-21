@@ -50,22 +50,32 @@ export class VoiceSessionLifecycle extends Listener {
 
     // Create new voice channel
     if (newState.channel) {
-      const sessionCreationChannel = await prisma.sessionCreationChannel.findFirst({
-        where: {
-          id: newState.channel.id,
-        },
-      });
+      const sessionCreationChannel =
+        await prisma.sessionCreationChannel.findFirst({
+          where: {
+            id: newState.channel.id,
+          },
+        });
 
       if (sessionCreationChannel) {
-        const channel = await newState.guild.channels.fetch(sessionCreationChannel.id);
-        const position = channel?.position ? (channel.position === 0 ? 1 : channel?.position) : 0;
+        const channel = await newState.guild.channels.fetch(
+          sessionCreationChannel.id
+        );
+        const position = channel?.position
+          ? channel.position === 0
+            ? 1
+            : channel?.position
+          : 0;
 
-        const newChannel = await newState.guild.channels.create('⌛ Initializing...', {
-          type: 'GUILD_VOICE',
-          bitrate: newState.guild.maximumBitrate,
-          parent: channel?.parent?.id,
-          position: position + 1,
-        });
+        const newChannel = await newState.guild.channels.create(
+          '⌛ Initializing...',
+          {
+            type: 'GUILD_VOICE',
+            bitrate: newState.guild.maximumBitrate,
+            parent: channel?.parent?.id,
+            position: position + 1,
+          }
+        );
 
         await newChannel.setPosition(position + 1, { relative: false });
 
@@ -99,13 +109,16 @@ export class VoiceSessionLifecycle extends Listener {
         continue;
       }
 
-      const voiceSession = voiceSessions.find((session) => session.id === state.channelId);
+      const voiceSession = voiceSessions.find(
+        (session) => session.id === state.channelId
+      );
 
       if (!voiceSession || !state.channel) {
         continue;
       }
 
-      const template = voiceSession.SessionCreationChannel?.template || '%emoji% %name%';
+      const template =
+        voiceSession.SessionCreationChannel?.template || '%emoji% %name%';
 
       let newChannelName: string;
 
@@ -115,10 +128,16 @@ export class VoiceSessionLifecycle extends Listener {
           .flat()
           .filter((x): x is Activity => !!x);
 
-        const activityName = generateNameFromActivities(activities, voiceSession.SessionCreationChannel?.fallbackName);
+        const activityName = generateNameFromActivities(
+          activities,
+          voiceSession.SessionCreationChannel?.fallbackName
+        );
         newChannelName = applyTemplate(template, activityName);
       } else {
-        newChannelName = applyTemplate(template, voiceSession.SessionCreationChannel?.fallbackName ?? 'Lounge');
+        newChannelName = applyTemplate(
+          template,
+          voiceSession.SessionCreationChannel?.fallbackName ?? 'Lounge'
+        );
       }
 
       await state.channel.setName(newChannelName);
@@ -127,10 +146,15 @@ export class VoiceSessionLifecycle extends Listener {
 }
 
 const applyTemplate = (template: string, name: string) => {
-  return template.replaceAll('%emoji%', emojiDictionary.get(name.toLowerCase()) || '🎮').replaceAll('%name%', name);
+  return template
+    .replaceAll('%emoji%', emojiDictionary.get(name.toLowerCase()) || '🎮')
+    .replaceAll('%name%', name);
 };
 
-const generateNameFromActivities = (activities: Activity[], fallback: string | undefined): string => {
+const generateNameFromActivities = (
+  activities: Activity[],
+  fallback: string | undefined
+): string => {
   const games = activities
     .filter((x) => x?.type === 'PLAYING')
     .map((x) => x?.name)
