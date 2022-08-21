@@ -7,7 +7,7 @@ import {
   startOfDay,
   subDays,
 } from 'date-fns';
-import { formatInTimeZone } from 'date-fns-tz';
+import { formatInTimeZone, utcToZonedTime } from 'date-fns-tz';
 
 export class LatestCommand extends Command {
   public constructor(context: Command.Context, options: CommandOptions) {
@@ -64,15 +64,17 @@ export class LatestCommand extends Command {
     }
 
     const sessionsLast3Days = userSessions.filter((session) => {
-      const end = new Date(session.endedAt!);
-      const threeDaysAgo = subDays(new Date(), 3);
+      const now = utcToZonedTime(new Date(), 'Europe/Oslo');
+      const endUtc = new Date(session.endedAt!);
+      const end = utcToZonedTime(endUtc, 'Europe/Oslo');
+      const threeDaysAgo = subDays(now, 3);
       const six = addHours(startOfDay(end), 6);
       return end > threeDaysAgo && end < six;
     });
 
     const latestSession = sessionsLast3Days.sort((a, b) => {
-      const endA = new Date(a.endedAt!);
-      const endB = new Date(b.endedAt!);
+      const endA = utcToZonedTime(new Date(a.endedAt!), 'Europe/Oslo');
+      const endB = utcToZonedTime(new Date(b.endedAt!), 'Europe/Oslo');
 
       const sixA = addHours(startOfDay(endA), 6);
       const sixB = addHours(startOfDay(endB), 6);
