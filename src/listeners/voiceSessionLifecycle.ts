@@ -17,6 +17,8 @@ const emojiDictionary = new Map([
   ['factorio', '⚙️'],
   ['league of legends', '️⚔️'],
   ["tiny tina's wonderlands", '🌈'],
+  ['heartstone', '🃏'],
+  ['for the king', '👑'],
 ]);
 
 export class VoiceSessionLifecycle extends Listener {
