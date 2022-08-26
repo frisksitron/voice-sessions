@@ -143,7 +143,9 @@ export class VoiceSessionLifecycle extends Listener {
         );
       }
 
-      await state.channel.setName(newChannelName);
+      if (newChannelName !== state.channel.name) {
+        await state.channel.setName(newChannelName);
+      }
     }
   }
 }
