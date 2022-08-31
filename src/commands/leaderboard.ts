@@ -4,7 +4,7 @@ import * as R from 'remeda';
 import { formatDuration, intervalToDuration } from 'date-fns';
 import { sum, normalize, toMilliseconds } from 'duration-fns';
 
-export class UserCommand extends Command {
+export class LeaderboardCommand extends Command {
   public constructor(context: Command.Context, options: Command.Options) {
     super(context, {
       ...options,
@@ -23,7 +23,23 @@ export class UserCommand extends Command {
   }
 
   public async chatInputRun(interaction: Command.ChatInputInteraction) {
-    const userSessions = await prisma.userSession.findMany();
+    const userSessions = await prisma.userSession.findMany({
+      where: {
+        VoiceSessionChannel: {
+          is: {
+            SessionCreationChannel: {
+              is: {
+                Guild: {
+                  is: {
+                    id: interaction.guild?.id,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
 
     if (userSessions.length <= 0) {
       await interaction.reply({
