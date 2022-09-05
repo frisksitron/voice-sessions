@@ -1,7 +1,7 @@
 import { Command, RegisterBehavior } from '@sapphire/framework';
 import prisma from '../database';
 
-export class UserCommand extends Command {
+export class NewCommand extends Command {
   public constructor(context: Command.Context, options: Command.Options) {
     super(context, {
       ...options,
@@ -52,8 +52,11 @@ export class UserCommand extends Command {
 
     const channelName =
       interaction.options.getString('name') || '➕ New Session';
+
     const channel = await interaction.guild.channels.create(channelName, {
       type: 'GUILD_VOICE',
+      position: undefined,
+      parent: undefined,
     });
 
     if (!channel) {

@@ -1,7 +1,7 @@
 import { Command, RegisterBehavior } from '@sapphire/framework';
 import prisma from '../database';
 
-export class UserCommand extends Command {
+export class RegisterCommand extends Command {
   public constructor(context: Command.Context, options: Command.Options) {
     super(context, {
       ...options,

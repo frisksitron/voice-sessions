@@ -68,17 +68,13 @@ export class VoiceSessionLifecycle extends Listener {
           sessionCreationChannel.id
         );
 
-        const position = !channel?.parent
-          ? channel?.position
-          : channel.position + 2 ?? 0;
-
         const newChannel = await newState.guild.channels.create(
           '⌛ Initializing...',
           {
             type: 'GUILD_VOICE',
             bitrate: newState.guild.maximumBitrate,
-            parent: channel?.parent?.id,
-            position: position,
+            parent: channel?.parent ?? undefined,
+            position: channel?.rawPosition,
           }
         );
 
