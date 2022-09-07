@@ -46,6 +46,19 @@ export class SessionsCommand extends Command {
       where: {
         userId: user.id,
         endedAt: null,
+        VoiceSessionChannel: {
+          is: {
+            SessionCreationChannel: {
+              is: {
+                Guild: {
+                  is: {
+                    id: interaction.guild?.id,
+                  },
+                },
+              },
+            },
+          },
+        },
       },
       include: {
         VoiceSessionChannel: true,
@@ -57,6 +70,19 @@ export class SessionsCommand extends Command {
         userId: user.id,
         endedAt: {
           not: null,
+        },
+        VoiceSessionChannel: {
+          is: {
+            SessionCreationChannel: {
+              is: {
+                Guild: {
+                  is: {
+                    id: interaction.guild?.id,
+                  },
+                },
+              },
+            },
+          },
         },
       },
       orderBy: {
