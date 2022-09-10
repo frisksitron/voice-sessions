@@ -1,6 +1,5 @@
 import { Command, RegisterBehavior } from '@sapphire/framework';
 import { MessageEmbed } from 'discord.js';
-import prisma from '../database';
 import { formatDistanceStrict, formatDistanceToNowStrict } from 'date-fns';
 import { formatInTimeZone } from 'date-fns-tz';
 
@@ -42,7 +41,9 @@ export class SessionsCommand extends Command {
       return;
     }
 
-    const activeUserSession = await prisma.userSession.findFirst({
+    const { database } = this.container;
+
+    const activeUserSession = await database.userSession.findFirst({
       where: {
         userId: user.id,
         endedAt: null,
@@ -65,7 +66,7 @@ export class SessionsCommand extends Command {
       },
     });
 
-    const userSessions = await prisma.userSession.findMany({
+    const userSessions = await database.userSession.findMany({
       where: {
         userId: user.id,
         endedAt: {

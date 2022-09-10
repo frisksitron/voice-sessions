@@ -1,5 +1,4 @@
 import { Command, RegisterBehavior } from '@sapphire/framework';
-import prisma from '../database';
 
 export class NewCommand extends Command {
   public constructor(context: Command.Context, options: Command.Options) {
@@ -40,7 +39,9 @@ export class NewCommand extends Command {
       return;
     }
 
-    const guild = await prisma.guild.upsert({
+    const { database } = this.container;
+
+    const guild = await database.guild.upsert({
       where: {
         id: guildId,
       },
@@ -67,7 +68,7 @@ export class NewCommand extends Command {
       return;
     }
 
-    await prisma.sessionCreationChannel.create({
+    await database.sessionCreationChannel.create({
       data: {
         id: channel.id,
         guildId: guild.id,

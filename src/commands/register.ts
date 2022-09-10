@@ -1,5 +1,4 @@
 import { Command, RegisterBehavior } from '@sapphire/framework';
-import prisma from '../database';
 
 export class RegisterCommand extends Command {
   public constructor(context: Command.Context, options: Command.Options) {
@@ -29,7 +28,9 @@ export class RegisterCommand extends Command {
       return;
     }
 
-    await prisma.guild.upsert({
+    const { database } = this.container;
+
+    await database.guild.upsert({
       where: {
         id: interaction.guild.id,
       },

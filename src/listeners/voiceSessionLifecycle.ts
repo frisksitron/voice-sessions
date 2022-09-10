@@ -1,6 +1,5 @@
 import { Events, Listener } from '@sapphire/framework';
 import type { Activity, VoiceState } from 'discord.js';
-import prisma from '../database';
 
 const emojiDictionary = new Map([
   ['lounge', '🍹'],
@@ -30,11 +29,13 @@ export class VoiceSessionLifecycle extends Listener {
   }
 
   public async run(oldState: VoiceState, newState: VoiceState) {
+    const { database } = this.container;
+
     // Remove empty voice channel
     if (oldState.channel && oldState.channel.members.size <= 0) {
       const oldChannelId = oldState.channel.id;
 
-      const session = await prisma.voiceSessionChannel.findUnique({
+      const session = await database.voiceSessionChannel.findUnique({
         where: {
           id: oldChannelId,
         },
@@ -43,7 +44,7 @@ export class VoiceSessionLifecycle extends Listener {
       if (session) {
         await oldState.channel.delete();
 
-        await prisma.voiceSessionChannel.update({
+        await database.voiceSessionChannel.update({
           where: {
             id: oldChannelId,
           },
@@ -57,7 +58,7 @@ export class VoiceSessionLifecycle extends Listener {
     // Create new voice channel
     if (newState.channel) {
       const sessionCreationChannel =
-        await prisma.sessionCreationChannel.findFirst({
+        await database.sessionCreationChannel.findFirst({
           where: {
             id: newState.channel.id,
           },
@@ -116,7 +117,7 @@ export class VoiceSessionLifecycle extends Listener {
         }
 
         // Update database with new channel
-        await prisma.voiceSessionChannel.create({
+        await database.voiceSessionChannel.create({
           data: {
             id: newChannel.id,
             sessionCreationChannelId: sessionCreationChannel.id,
@@ -129,7 +130,7 @@ export class VoiceSessionLifecycle extends Listener {
     }
 
     // Rename channel
-    const voiceSessions = await prisma.voiceSessionChannel.findMany({
+    const voiceSessions = await database.voiceSessionChannel.findMany({
       where: {
         deletedAt: {
           equals: null,

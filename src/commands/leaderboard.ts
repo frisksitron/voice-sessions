@@ -1,5 +1,4 @@
 import { Command, RegisterBehavior } from '@sapphire/framework';
-import prisma from '../database';
 import * as R from 'remeda';
 import { formatDuration, intervalToDuration } from 'date-fns';
 import { sum, normalize, toMilliseconds } from 'duration-fns';
@@ -23,7 +22,8 @@ export class LeaderboardCommand extends Command {
   }
 
   public async chatInputRun(interaction: Command.ChatInputInteraction) {
-    const userSessions = await prisma.userSession.findMany({
+    const { database } = this.container;
+    const userSessions = await database.userSession.findMany({
       where: {
         VoiceSessionChannel: {
           is: {

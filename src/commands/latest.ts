@@ -1,5 +1,4 @@
 import { Command, CommandOptions, RegisterBehavior } from '@sapphire/framework';
-import prisma from '../database';
 import {
   addHours,
   differenceInSeconds,
@@ -38,9 +37,10 @@ export class LatestCommand extends Command {
   }
 
   public async chatInputRun(interaction: Command.ChatInputInteraction) {
+    const { database } = this.container;
     const user = interaction.options.getUser('user') || interaction.user;
 
-    const userSessions = await prisma.userSession.findMany({
+    const userSessions = await database.userSession.findMany({
       where: {
         userId: user.id,
         endedAt: {

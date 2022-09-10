@@ -1,6 +1,5 @@
 import { Events, Listener } from '@sapphire/framework';
 import type { VoiceState } from 'discord.js';
-import prisma from '../database';
 
 export class UserSessionLifecycle extends Listener {
   public constructor(context: Listener.Context, options: Listener.Options) {
@@ -17,8 +16,10 @@ export class UserSessionLifecycle extends Listener {
       return;
     }
 
+    const { database } = this.container;
+
     if (oldState && oldState.channelId) {
-      const userSession = await prisma.userSession.findFirst({
+      const userSession = await database.userSession.findFirst({
         where: {
           userId: userId,
           endedAt: null,
@@ -27,7 +28,7 @@ export class UserSessionLifecycle extends Listener {
       });
 
       if (userSession) {
-        await prisma.userSession.update({
+        await database.userSession.update({
           where: {
             id: userSession.id,
           },
@@ -39,7 +40,7 @@ export class UserSessionLifecycle extends Listener {
     }
 
     if (newState && newState.channelId) {
-      const voiceSession = await prisma.voiceSessionChannel.findUnique({
+      const voiceSession = await database.voiceSessionChannel.findUnique({
         where: {
           id: newState.channelId,
         },
@@ -47,14 +48,14 @@ export class UserSessionLifecycle extends Listener {
 
       if (voiceSession) {
         // End existing sessions
-        const userSession = await prisma.userSession.findMany({
+        const userSession = await database.userSession.findMany({
           where: {
             userId: userId,
             endedAt: null,
           },
         });
         if (userSession.length > 0) {
-          await prisma.userSession.updateMany({
+          await database.userSession.updateMany({
             where: {
               userId: userId,
               endedAt: null,
@@ -66,7 +67,7 @@ export class UserSessionLifecycle extends Listener {
         }
 
         // Create new session
-        await prisma.userSession.create({
+        await database.userSession.create({
           data: {
             userId: userId,
             voiceSessionChannelId: newState.channelId,

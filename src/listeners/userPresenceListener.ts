@@ -1,6 +1,5 @@
 import { Events, Listener } from '@sapphire/framework';
 import type { Activity, Presence } from 'discord.js';
-import prisma from '../database';
 
 const emojiDictionary = new Map([
   ['lounge', '🍹'],
@@ -39,7 +38,9 @@ export class UserPresenceListener extends Listener {
         continue;
       }
 
-      const voiceSession = await prisma.voiceSessionChannel.findUnique({
+      const { database } = this.container;
+
+      const voiceSession = await database.voiceSessionChannel.findUnique({
         where: {
           id: presence.member.voice.channel.id,
         },
