@@ -80,42 +80,6 @@ export class VoiceSessionLifecycle extends Listener {
           }
         );
 
-        // Update position of the next channels to accomodate the new channel
-        const channels = channel?.parent?.children
-          .filter((x) => x.type === 'GUILD_VOICE')
-          .sort(
-            (a, b) => a.rawPosition - b.rawPosition || a.id.localeCompare(b.id)
-          );
-
-        const channelArray = Array.from(channels?.values() || []);
-
-        console.log(
-          'channelArray',
-          channelArray.map((x) => `${x.rawPosition} ${x.position} ${x.name}`)
-        );
-
-        const channelIndex = channelArray.findIndex(
-          (x) => x.id === sessionCreationChannel.id
-        );
-        const restOfChannels = channelArray.slice(channelIndex + 1);
-        const nextChannels = restOfChannels.filter(
-          (x) => x.rawPosition === channel?.rawPosition
-        );
-        if (nextChannels.length > 0) {
-          console.log('Updating position of channels');
-          console.log('Next channels', nextChannels);
-
-          for (const rest of restOfChannels) {
-            console.log("Updating channel's position", rest.name);
-            console.log('Old position', rest.rawPosition);
-            console.log('New position', rest.rawPosition + 1);
-
-            await rest.edit({
-              position: rest.position + 1,
-            });
-          }
-        }
-
         // Update database with new channel
         await database.voiceSessionChannel.create({
           data: {

@@ -14,6 +14,7 @@ config();
 // Set default inspection depth
 inspect.defaultOptions.depth = 1;
 
+// Enable colors in console
 colorette.createColors({ useColor: true });
 
 const client = new BotClient();

@@ -9,7 +9,7 @@ export class TestTask extends ScheduledTask {
     super(context, {
       ...options,
       cron: '*/1 * * * *',
-      // enabled: process.env.NODE_ENV === 'production',
+      enabled: false,
     });
   }
 
